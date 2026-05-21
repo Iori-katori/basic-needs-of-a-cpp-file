@@ -1,0 +1,64 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+typedef int Itemtype;
+
+struct stackNode
+{
+	Itemtype Info;
+	stackNode* Next;
+};
+
+struct Stack
+{
+	stackNode* Top;
+};
+
+stackNode* createstackNode(Itemtype x)
+{
+	stackNode* p = new stackNode;
+	if (p == NULL) return NULL;
+	p->Info = x;
+	p->Next = NULL;
+	return p;
+}
+
+void initStack(Stack& st)
+{
+	st.Top = NULL;
+}
+
+int isempty(Stack st)
+{
+	if (st.Top == NULL) return 1;
+	else return 0;
+}
+
+int push(Stack& st, Itemtype x)
+{
+	stackNode* p = createstackNode(x);
+	if (p == NULL) return 0;
+	p->Next = st.Top;
+	st.Top = p;
+	return 1;
+}
+
+int pop(Stack& st, Itemtype& x)
+{
+	if (isempty(st) == 1) return 0;
+	stackNode* p = st.Top;
+	st.Top = st.Top->Next;
+	x = p->Info;
+	delete p;
+	return 1;
+}
+
+int main()
+{
+  printf("write something inside here");
+  return 0;
+}
