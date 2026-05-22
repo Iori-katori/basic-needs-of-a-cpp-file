@@ -1,0 +1,69 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef int Itemtype;
+
+struct snode
+{
+	Itemtype Info;
+	snode* next;
+};
+
+struct slist 
+{
+	snode* head;
+	snode* tail;
+};
+
+snode* createSnode(Itemtype x)
+{
+	snode* p = new snode;
+	if (p == NULL)
+	{
+		printf("ko the cap phat nut moi");
+		return NULL;
+	}
+	p->Info = x;
+	p->next = NULL;
+	return p;
+}
+
+void initSlist(slist& sl)
+{
+	sl.head = NULL;
+	sl.tail = NULL;
+}
+
+int isempty(slist sl)
+{
+	if (sl.head = NULL)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void showsnode(snode* p)
+{
+	printf("%d\n",p->Info);
+}
+
+void deleteSnode(snode*& p)
+{
+	if (p == NULL) return;
+	p->next = NULL;
+	delete p;
+	p = NULL;
+}
+
+int main()
+{
+  printf("write something inside here");
+  return 0;
+}
