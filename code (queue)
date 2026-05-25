@@ -1,0 +1,112 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int Itemtype;
+
+struct snode {
+    Itemtype Info;
+    snode* next;
+};
+
+struct slist {
+    snode* head;
+    snode* tail;
+};
+
+
+snode* createSnode(Itemtype x) {
+    snode* p = new snode;
+    if (p == NULL) {
+        printf("cannot create new node!\n");
+        return NULL;
+    }
+    p->Info = x;
+    p->next = NULL;
+    return p;
+}
+
+
+void initQueue(slist& q) {
+    q.head = NULL;
+    q.tail = NULL;
+}
+
+
+int isEmpty(slist q) {
+    return (q.head == NULL) ? 1 : 0;
+}
+
+
+int enQueue(slist& q, Itemtype x) {
+    snode* p = createSnode(x);
+    if (p == NULL) return 0;
+
+    if (isEmpty(q)) {
+        q.head = p;
+        q.tail = p;
+    } else {
+        q.tail->next = p;
+        q.tail = p;
+    }
+    return 1;
+}
+
+
+int deQueue(slist& q, Itemtype& x) {
+    if (isEmpty(q)) return 0;
+
+    snode* p = q.head;
+    x = p->Info;
+
+    q.head = q.head->next;
+    if (q.head == NULL) {
+        q.tail = NULL;
+    }
+
+    delete p;
+    return 1;
+}
+
+
+void printQueue(slist q) {
+    if (isEmpty(q)) {
+        printf("queue is empty!\n");
+        return;
+    }
+    snode* p = q.head;
+    printf("Queue from Front -> Rear: ");
+    while (p != NULL) {
+        printf("%d ", p->Info);
+        p = p->next;
+    }
+    printf("\n");
+}
+
+
+//example for the main
+int main() {
+    slist myQueue;
+    initQueue(myQueue);
+
+
+    printf("--- Enqueue 10, 20, 30 ---\n");
+    enQueue(myQueue, 10);
+    enQueue(myQueue, 20);
+    enQueue(myQueue, 30);
+    printQueue(myQueue); 
+
+
+    Itemtype poppedValue;
+    if (deQueue(myQueue, poppedValue)) {
+        printf("\ntook %d out of the queue.\n", poppedValue);
+    }
+    printQueue(myQueue); 
+
+
+    printf("\n--- Enqueue 40 ---\n");
+    enQueue(myQueue, 40);
+    printQueue(myQueue); 
+
+    return 0;
+}
