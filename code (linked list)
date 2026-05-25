@@ -39,7 +39,7 @@ void initSlist(slist& sl)
 
 int isempty(slist sl)
 {
-	if (sl.head = NULL)
+	if (sl.head == NULL)
 	{
 		return 1;
 	}
