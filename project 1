@@ -1,0 +1,116 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef int ItemType;
+struct SNode
+{
+    ItemType Info;
+    SNode* Next;
+};
+
+struct SList
+{
+    SNode* Head;
+    SNode* Tail;
+};
+
+SNode* createSNode(ItemType x)
+{
+    SNode* p = new SNode;
+    if (p == NULL)
+    {
+        printf("ko the cap phat nut moi");
+        return NULL;
+    }
+    p->Info = x;
+    p->Next = NULL;
+    return p;
+}
+
+void initSList(SList& sl)
+{
+    sl.Head = NULL;
+    sl.Tail = NULL;
+}
+
+int isEmpty(SList sl)
+{
+    if (sl.Head == NULL) return 1;
+    else return 0;
+}
+
+//hien thi thong tin node
+void showSNode(SNode* p)
+{
+    printf("%d\n", p->Info);
+}
+
+//menu
+void ShowMenu()
+{
+    printf("1/tao va xuat ra noi dung vua nhap \n2/huy nut vua tao \n0/thoat chuong trinh");
+}
+
+void deleteSNode(SNode*& p)
+{
+    if (p == NULL) return;
+    p->Next = NULL;
+    delete p;
+    p = NULL;
+}
+
+
+void process()
+{
+    ItemType x;
+    SNode* p = NULL;
+    int luachon;
+    SList SL;
+    initSList(SL);
+
+    do
+    {
+        ShowMenu();
+        printf("\nChon chuc nang: ");
+        scanf("%d", &luachon);
+
+        switch (luachon)
+        {
+        case 1:
+            printf("Nhap so nguyen bat ky: ");
+            scanf("%d", &x);
+            p = createSNode(x);
+            if (p != NULL) {
+                printf("Noi dung node vua tao la: ");
+                showSNode(p);
+            }
+            break;
+
+        case 2:
+            deleteSNode(p);
+            if (p == NULL)
+            {
+                printf("Da huy node thanh cong!\n");
+            }
+            else
+            {
+                printf("Xoa node that bai!\n");
+            }
+            break;
+        }
+    } while (luachon != 0);
+}
+
+int main()
+{
+    ItemType x;
+    SNode* p = NULL;
+    int luachon;
+    SList SL;
+    initSList(SL);
+    process();
+    return 0;
+}
