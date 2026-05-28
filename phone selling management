@@ -1,0 +1,588 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+
+typedef struct DienThoai 
+{
+    char MaDT[13];     
+    char TenDT[26];    
+    char TenHang[11];  
+    int GiaBan;        
+    int NamSX;          
+} DienThoai;
+
+typedef struct Node 
+{
+    DienThoai data;
+    struct Node* next;
+} Node;
+
+typedef struct LinkedList 
+{
+    Node* head;
+    Node* tail;
+} LinkedList;
+
+void initList(LinkedList* list) 
+{
+    list->head = NULL;
+    list->tail = NULL;
+}
+
+//chuan hoa chuoi (advanced)
+void trim(char* str) 
+{
+    int len = strlen(str);
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r' || str[len - 1] == ' ')) 
+    {
+        str[--len] = '\0';
+    }
+    int start = 0;
+    while (str[start] == ' ') 
+    {
+        start++;
+    }
+    if (start > 0) {
+        memmove(str, str + start, len - start + 1);
+    }
+}
+
+//so sanh chuoi khong phan biet hoa thuong, co the thay the bang ham strcasecmp
+int compareIgnoreCase(const char* s1, const char* s2) 
+{
+    while (*s1 && *s2) 
+    {
+        char c1 = tolower((unsigned char)*s1);
+        char c2 = tolower((unsigned char)*s2);
+        if (c1 != c2) return c1 - c2;
+        s1++;
+        s2++;
+    }
+    return tolower((unsigned char)*s1) - tolower((unsigned char)*s2);
+}
+
+
+void nhapDienThoai(DienThoai* dt) 
+{
+    printf("Nhap ma dien thoai (toi da 12 ky tu): ");
+    fgets(dt->MaDT, sizeof(dt->MaDT), stdin); trim(dt->MaDT);
+
+    printf("Nhap ten dien thoai (toi da 25 ky tu): ");
+    fgets(dt->TenDT, sizeof(dt->TenDT), stdin); trim(dt->TenDT);
+
+    printf("Nhap ten hang (toi da 10 ky tu): ");
+    fgets(dt->TenHang, sizeof(dt->TenHang), stdin); trim(dt->TenHang);
+
+    printf("Nhap gia ban: ");
+    scanf("%d", &dt->GiaBan);
+
+    printf("Nhap nam san xuat: ");
+    scanf("%d", &dt->NamSX);
+    while (getchar() != '\n'); 
+}
+
+
+void xuatDienThoai(DienThoai dt) 
+{
+    printf("Ma DT: %-12s | Ten: %-20s | Hang: %-10s | Nam SX: %-4d | Gia: %d VND\n",
+        dt.MaDT, dt.TenDT, dt.TenHang, dt.NamSX, dt.GiaBan);
+}
+
+
+Node* taoNodeTuDong(char* line) 
+{
+    if (strlen(line) <= 1) return NULL;
+
+    DienThoai dt;
+    char* token;
+
+    token = strtok(line, "#");
+    if (!token) return NULL;
+    strncpy(dt.MaDT, token, 12); dt.MaDT[12] = '\0'; trim(dt.MaDT);
+
+    token = strtok(NULL, "#");
+    if (!token) return NULL;
+    strncpy(dt.TenDT, token, 25); dt.TenDT[25] = '\0'; trim(dt.TenDT);
+
+    token = strtok(NULL, "#");
+    if (!token) return NULL;
+    strncpy(dt.TenHang, token, 10); dt.TenHang[10] = '\0'; trim(dt.TenHang);
+
+    token = strtok(NULL, "#");
+    if (!token) return NULL;
+    dt.GiaBan = atoi(token);
+
+    token = strtok(NULL, "#\n\r");
+    if (!token) return NULL;
+    dt.NamSX = atoi(token);
+
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (newNode) 
+    {
+        newNode->data = dt;
+        newNode->next = NULL;
+    }
+    return newNode;
+}
+
+
+void themCuoi(LinkedList* list, Node* newNode) 
+{
+    if (!newNode) return;
+    if (list->head == NULL) {
+        list->head = newNode;
+        list->tail = newNode;
+    }
+    else {
+        list->tail->next = newNode;
+        list->tail = newNode;
+    }
+}
+
+
+void docFile(LinkedList* list, const char* filename) 
+{
+    FILE* f = fopen(filename, "r");
+    if (!f) 
+    {
+        printf("Khong the mo file %s!\n", filename);
+        return;
+    }
+
+    char line[256];
+    
+    if (fgets(line, sizeof(line), f)) 
+    {
+        //read from begin to the end
+    }
+
+    while (fgets(line, sizeof(line), f)) 
+    {
+        trim(line);
+        if (strlen(line) > 0) 
+        {
+            Node* newNode = taoNodeTuDong(line);
+            if (newNode) 
+            {
+                themCuoi(list, newNode);
+            }
+        }
+    }
+    fclose(f);
+    printf("Doc file thanh cong!\n");
+}
+
+
+void xuatDanhSach(LinkedList list) 
+{
+    if (list.head == NULL) 
+    {
+        printf("Danh sach trong!\n");
+        return;
+    }
+    printf("\n%2s | %-12s | %-25s | %-10s | %-6s | %-12s\n", "STT", "Ma So", "Ten dien thoai", "Ten hang", "Nam SX", "Gia ban");
+    printf("--------------------------------------------------------------------------------------\n");
+    int stt = 1;
+    Node* p = list.head;
+    while (p != NULL) 
+    {
+        printf("%3d | %-12s | %-25s | %-10s | %6d | %12d\n",
+            stt++, p->data.MaDT, p->data.TenDT, p->data.TenHang, p->data.NamSX, p->data.GiaBan);
+        p = p->next;
+    }
+    printf("\n");
+}
+
+
+void themVaGhiFile(LinkedList* list, const char* filename) 
+{
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (!newNode) return;
+
+    printf("--- Nhap thong tin dien thoai moi ---\n");
+    nhapDienThoai(&newNode->data);
+    newNode->next = NULL;
+
+    themCuoi(list, newNode);
+
+    //ghi bo sung append vo file
+    FILE* f = fopen(filename, "a");
+    if (f) 
+    {
+        fprintf(f, "\n%s#%s#%s#%d#%d", newNode->data.MaDT, newNode->data.TenDT, newNode->data.TenHang, newNode->data.GiaBan, newNode->data.NamSX);
+        fclose(f);
+        printf("Da ghi bo sung vao file %s!\n", filename);
+    }
+    else 
+    {
+        printf("Khong the mo file de ghi bo sung!\n");
+    }
+}
+
+
+void lietKeTheoHang(LinkedList list) 
+{
+    char hang[11];
+    printf("Nhap ten hang can tim: ");
+    fgets(hang, sizeof(hang), stdin); trim(hang);
+
+    int found = 0;
+    Node* p = list.head;
+
+    printf("\nKet qua tim kiem hang '%s':\n", hang);
+    while (p != NULL) 
+    {
+        if (compareIgnoreCase(p->data.TenHang, hang) == 0) {
+            xuatDienThoai(p->data);
+            found = 1;
+        }
+        p = p->next;
+    }
+    if (!found) 
+    {
+        printf("Khong tim thay dien thoai cua hang %s\n", hang);
+    }
+}
+
+
+void sapXepDanhSach(LinkedList* list) 
+{
+    if (list->head == NULL || list->head->next == NULL) return;
+
+    for (Node* i = list->head; i != NULL; i = i->next) 
+    {
+        for (Node* j = i->next; j != NULL; j = j->next) 
+        {
+            int compHang = compareIgnoreCase(i->data.TenHang, j->data.TenHang);
+            if (compHang > 0 || (compHang == 0 && i->data.GiaBan < j->data.GiaBan)) 
+            {
+                DienThoai temp = i->data;
+                i->data = j->data;
+                j->data = temp;
+            }
+        }
+    }
+    printf("Da sap xep danh sach xong!\n");
+}
+
+
+void tinhGiaTrungBinh(LinkedList list) 
+{
+    if (list.head == NULL) 
+    {
+        printf("Danh sach trong, khong the tinh trung binh!\n");
+        return;
+    }
+    long long tong = 0;
+    int dem = 0;
+    Node* p = list.head;
+    while (p != NULL) 
+    {
+        tong += p->data.GiaBan;
+        dem++;
+        p = p->next;
+    }
+    printf("Gia ban trung binh cua tat ca dien thoai: %.2f VND\n", (double)tong / dem);
+}
+
+
+void timHangNhieuNhat(LinkedList list) 
+{
+    if (list.head == NULL) 
+    {
+        printf("Danh sach trong!\n");
+        return;
+    }
+
+
+    typedef struct 
+    {
+        char TenHang[11];
+        int SoLuong;
+    } DemHang;
+
+    DemHang dsDem[100];
+    int nHang = 0;
+
+    Node* p = list.head;
+    while (p != NULL) 
+    {
+        int index = -1;
+        for (int i = 0; i < nHang; i++) 
+        {
+            if (compareIgnoreCase(dsDem[i].TenHang, p->data.TenHang) == 0) 
+            {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) 
+        {
+            dsDem[index].SoLuong++;
+        }
+        else 
+        {
+            strncpy(dsDem[nHang].TenHang, p->data.TenHang, 10);
+            dsDem[nHang].TenHang[10] = '\0';
+            dsDem[nHang].SoLuong = 1;
+            nHang++;
+        }
+        p = p->next;
+    }
+
+  
+    int maxSl = 0;
+    for (int i = 0; i < nHang; i++) 
+    {
+        if (dsDem[i].SoLuong > maxSl) 
+        {
+            maxSl = dsDem[i].SoLuong;
+        }
+    }
+
+    printf("Hang co nhieu dien thoai nhat (So luong: %d):\n", maxSl);
+    for (int i = 0; i < nHang; i++) 
+    {
+        if (dsDem[i].SoLuong == maxSl) 
+        {
+            printf("- %s\n", dsDem[i].TenHang);
+        }
+    }
+}
+
+
+void xoaGiaCaoNhat(LinkedList* list) 
+{
+    if (list->head == NULL) 
+    {
+        printf("Danh sach trong, khong co gi de xoa!\n");
+        return;
+    }
+
+ 
+    int maxGia = list->head->data.GiaBan;
+    Node* p = list->head;
+    while (p != NULL) 
+    {
+        if (p->data.GiaBan > maxGia) 
+        {
+            maxGia = p->data.GiaBan;
+        }
+        p = p->next;
+    }
+
+   
+    Node* curr = list->head;
+    Node* prev = NULL;
+    int xoaThanhCong = 0;
+
+    while (curr != NULL) 
+    {
+        if (curr->data.GiaBan == maxGia) 
+        {
+            Node* temp = curr;
+            if (prev == NULL) 
+            { 
+                list->head = curr->next;
+                curr = list->head;
+                if (list->head == NULL) 
+                {
+                    list->tail = NULL;
+                }
+            }
+            else 
+            {
+                prev->next = curr->next;
+                if (curr == list->tail) 
+                {
+                    list->tail = prev;
+                }
+                curr = curr->next;
+            }
+            free(temp);
+            xoaThanhCong = 1;
+        }
+        else 
+        {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
+    if (xoaThanhCong) 
+    {
+        printf("Da xoa (cac) dien thoai co gia cao nhat (%d VND) khoi danh sach!\n", maxGia);
+    }
+}
+
+
+void giaiPhongList(LinkedList* list) 
+{
+    Node* p = list->head;
+    while (p != NULL) 
+    {
+        Node* temp = p;
+        p = p->next;
+        free(temp);
+    }
+    list->head = NULL;
+    list->tail = NULL;
+}
+
+
+
+
+typedef struct StackNode 
+{
+    char data;
+    struct StackNode* next;
+} StackNode;
+
+void push(StackNode** top, char c) 
+{
+    StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    if (!newNode) return;
+    newNode->data = c;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+char pop(StackNode** top) 
+{
+    if (*top == NULL) return '\0';
+    StackNode* temp = *top;
+    char c = temp->data;
+    *top = (*top)->next;
+    free(temp);
+    return c;
+}
+
+int isMatchingPair(char character1, char character2) 
+{
+    if (character1 == '(' && character2 == ')') return 1;
+    if (character1 == '{' && character2 == '}') return 1;
+    if (character1 == '[' && character2 == ']') return 1;
+    return 0;
+}
+
+int kiemTraDauNgoac(const char* expr) 
+{
+    StackNode* stack = NULL;
+    int i = 0;
+    while (expr[i]) 
+    {
+        if (expr[i] == '(' || expr[i] == '{' || expr[i] == '[') 
+        {
+            push(&stack, expr[i]);
+        }
+        if (expr[i] == ')' || expr[i] == '}' || expr[i] == ']') 
+        {
+            if (stack == NULL) return 0; 
+            char topChar = pop(&stack);
+            if (!isMatchingPair(topChar, expr[i])) 
+            {
+                
+                while (stack != NULL) pop(&stack);
+                return 0;
+            }
+        }
+        i++;
+    }
+    if (stack == NULL) return 1; 
+
+   
+    while (stack != NULL) pop(&stack);
+    return 0;
+}
+
+void thucHienKiemTraNgoac() 
+{
+    char expr[100];
+    printf("Nhap chuoi dau ngoac can kiem tra (vi du: {[()]}): ");
+    fgets(expr, sizeof(expr), stdin); trim(expr);
+
+    if (kiemTraDauNgoac(expr)) 
+    {
+        printf("-> Chuoi Hop Le!\n");
+    }
+    else 
+    {
+        printf("-> Chuoi KHONG Hop Le!\n");
+    }
+}
+
+
+
+int main() 
+{
+    LinkedList list;
+    initList(&list);
+    const char* filename = "dsdienthoai.txt";
+    int luachon;
+
+    do {
+        printf("\n==================== MENU QUAN LY ====================\n");
+        printf("1. Doc danh sach dien thoai tu file '%s'\n", filename);
+        printf("2. Xuat toan bo danh sach dien thoai ra man hinh\n");
+        printf("3. Them mot dien thoai moi (Ghi vao DSLK & File)\n");
+        printf("4. Tim kiem va liet ke dien thoai theo Hang\n");
+        printf("5. Sap xep danh sach (Tang theo Hang, Giam theo Gia)\n");
+        printf("6. Tinh gia ban trung binh cua cac dien thoai\n");
+        printf("7. Tim hang co nhieu dien thoai nhat\n");
+        printf("8. Xoa cac dien thoai co gia cao nhat\n");
+        printf("9. Kiem tra tinh hop le cua chuoi dau ngoac (Stack/LIFO)\n");
+        printf("0. Thoat chuong trinh\n");
+        printf("======================================================\n");
+        printf("Nhap lua chon cua ban (0-9): ");
+
+        if (scanf("%d", &luachon) != 1) 
+        {
+            printf("Lua chon khong hop le!\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        while (getchar() != '\n'); // Xóa bộ đệm đầu vào
+
+        switch (luachon) 
+        {
+        case 1:
+            docFile(&list, filename);
+            break;
+        case 2:
+            xuatDanhSach(list);
+            break;
+        case 3:
+            themVaGhiFile(&list, filename);
+            break;
+        case 4:
+            lietKeTheoHang(list);
+            break;
+        case 5:
+            sapXepDanhSach(&list);
+            xuatDanhSach(list);
+            break;
+        case 6:
+            tinhGiaTrungBinh(list);
+            break;
+        case 7:
+            timHangNhieuNhat(list);
+            break;
+        case 8:
+            xoaGiaCaoNhat(&list);
+            break;
+        case 9:
+            thucHienKiemTraNgoac();
+            break;
+        case 0:
+            printf("Tam biet!\n");
+            break;
+        default:
+            printf("Lua chon khong dung, vui long chon lai!\n");
+        }
+    } while (luachon != 0);
+
+    giaiPhongList(&list);
+    return 0;
+}
