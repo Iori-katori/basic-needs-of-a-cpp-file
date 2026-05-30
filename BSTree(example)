@@ -1,0 +1,275 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef int Itemtype;
+struct BSTnode {
+	Itemtype Info;
+	BSTnode* left;
+	BSTnode* right;
+};
+
+struct BSTree {
+	BSTnode* root;
+};
+
+struct LinkNode {
+	BSTnode* treeNode;
+	LinkNode* next;
+};
+struct Queue {
+	LinkNode* head;
+	LinkNode* tail;
+};
+struct Stack {
+	LinkNode* top;
+};
+
+void initBSTree(BSTree& bt) {
+	bt.root = NULL;
+}
+
+BSTnode* createBSTnode(Itemtype x) {
+	BSTnode* p = new BSTnode;
+	if (p == NULL) {
+		printf("Khong the cap phat nut moi!\n");
+		return NULL;
+	}
+	p->Info = x;
+	p->left = NULL;
+	p->right = NULL;
+	return p;
+}
+
+
+int insertBSTnode(BSTnode*& root, BSTnode* p) {
+	if (p == NULL) return 0;
+	if (root == NULL) {
+		root = p;
+		return 1;
+	}
+	if (root->Info == p->Info) return 0;
+	if (p->Info < root->Info)
+		return insertBSTnode(root->left, p);
+	else
+		return insertBSTnode(root->right, p);
+}
+
+void createBSTree_fromarray(BSTree& bt, Itemtype a[], int n) {
+	initBSTree(bt);
+	for (int i = 0; i < n; i++) {
+		BSTnode* p = createBSTnode(a[i]);
+		insertBSTnode(bt.root, p);
+	}
+}
+
+void createBSTree_fromKeyboard(BSTree& bt) {
+	initBSTree(bt);
+	Itemtype x;
+	printf("Nhap cac gia tri (Nhap -99 de dung): ");
+	while (true) {
+		scanf("%d", &x);
+		if (x == -99) break;
+		BSTnode* p = createBSTnode(x);
+		insertBSTnode(bt.root, p);
+	}
+}
+
+void createBSTree_Random(BSTree& bt, int n) {
+	initBSTree(bt);
+	srand((unsigned)time(NULL));
+	for (int i = 0; i < n; i++) {
+		Itemtype x = rand() % 100;
+		BSTnode* p = createBSTnode(x);
+		insertBSTnode(bt.root, p);
+	}
+}
+
+void createBSTree_fromFile(BSTree& bt, const char* filename) {
+	initBSTree(bt);
+	FILE* f = fopen(filename, "r");
+	if (!f) {
+		printf("Khong mo duoc file!\n");
+		return;
+	}
+	Itemtype x;
+	while (fscanf(f, "%d", &x) != EOF) {
+		BSTnode* p = createBSTnode(x);
+		insertBSTnode(bt.root, p);
+	}
+	fclose(f);
+}
+
+void traverseNLR(BSTnode* root) {
+	if (!root) return;
+	printf("%4d", root->Info);
+	traverseNLR(root->left);
+	traverseNLR(root->right);
+}
+
+void traverseLNR(BSTnode* root) {
+	if (!root) return;
+	traverseLNR(root->left);
+	printf("%4d", root->Info);
+	traverseLNR(root->right);
+}
+
+void traverseLRN(BSTnode* root) {
+	if (!root) return;
+	traverseLRN(root->left);
+	traverseLRN(root->right);
+	printf("%4d", root->Info);
+}
+
+void traverseNRL(BSTnode* root) {
+	if (!root) return;
+	printf("%4d", root->Info);
+	traverseNRL(root->right);
+	traverseNRL(root->left);
+}
+void traverseRNL(BSTnode* root) {
+	if (!root) return;
+	traverseRNL(root->right);
+	printf("%4d", root->Info);
+	traverseRNL(root->left);
+}
+
+void traverseRLN(BSTnode* root) {
+	if (!root) return;
+	traverseRLN(root->right);
+	traverseRLN(root->left);
+	printf("%4d", root->Info);
+}
+
+void pushQueue(Queue& q, BSTnode* tNode) {
+	LinkNode* p = new LinkNode{ tNode, NULL };
+	if (!q.head) q.head = q.tail = p;
+	else { q.tail->next = p; q.tail = p; }
+}
+BSTnode* popQueue(Queue& q) {
+	if (!q.head) return NULL;
+	LinkNode* p = q.head; BSTnode* t = p->treeNode;
+	q.head = q.head->next; delete p;
+	return t;
+}
+void traverseBreadth(BSTnode* root) {
+	if (!root) return;
+	Queue q = { NULL, NULL };
+	pushQueue(q, root);
+	while (q.head) {
+		BSTnode* curr = popQueue(q);
+		printf("%4d", curr->Info);
+		if (curr->left) pushQueue(q, curr->left);
+		if (curr->right) pushQueue(q, curr->right);
+	}
+}
+
+void pushStack(Stack& s, BSTnode* tNode) {
+	LinkNode* p = new LinkNode{ tNode, s.top };
+	s.top = p;
+}
+BSTnode* popStack(Stack& s) {
+	if (!s.top) return NULL;
+	LinkNode* p = s.top; BSTnode* t = p->treeNode;
+	s.top = s.top->next; delete p;
+	return t;
+}
+void traverseDepth(BSTnode* root) {
+	if (!root) return;
+	Stack s = { NULL };
+	pushStack(s, root);
+	while (s.top) {
+		BSTnode* curr = popStack(s);
+		printf("%4d", curr->Info);
+		if (curr->right) pushStack(s, curr->right); 
+		if (curr->left) pushStack(s, curr->left);
+	}
+}
+
+int countBSTnode(BSTnode* root) {
+	if (!root) return 0;
+	return 1 + countBSTnode(root->left) + countBSTnode(root->right);
+}
+
+BSTnode* findBSTnode(BSTnode* root, Itemtype x) {
+	if (root == NULL || root->Info == x) return root;
+	if (x < root->Info) return findBSTnode(root->left, x);
+	return findBSTnode(root->right, x);
+}
+
+void listNodesGreaterThanX(BSTnode* root, Itemtype x) {
+	if (!root) return;
+	listNodesGreaterThanX(root->left, x);
+	if (root->Info > x) printf("%4d", root->Info);
+	listNodesGreaterThanX(root->right, x);
+}
+
+int countLeaf(BSTnode* root) {
+	if (!root) return 0;
+	if (root->left == NULL && root->right == NULL) return 1;
+	return countLeaf(root->left) + countLeaf(root->right);
+}
+
+int countNodeHave1Child(BSTnode* root) {
+	if (!root) return 0;
+	int count = 0;
+	if ((root->left != NULL && root->right == NULL) || (root->left == NULL && root->right != NULL)) {
+		count = 1;
+	}
+	return count + countNodeHave1Child(root->left) + countNodeHave1Child(root->right);
+}
+
+int countNodeHave2Children(BSTnode* root) {
+	if (!root) return 0;
+	int count = 0;
+	if (root->left != NULL && root->right != NULL) {
+		count = 1;
+	}
+	return count + countNodeHave2Children(root->left) + countNodeHave2Children(root->right);
+}
+
+int sumAllNodes(BSTnode* root) {
+	if (!root) return 0;
+	return root->Info + sumAllNodes(root->left) + sumAllNodes(root->right);
+}
+
+int sumLeafNodes(BSTnode* root) {
+	if (!root) return 0;
+	if (root->left == NULL && root->right == NULL) return root->Info;
+	return sumLeafNodes(root->left) + sumLeafNodes(root->right);
+}
+
+int highTree(BSTnode* root) {
+	if (!root) return 0;
+	int hl = highTree(root->left);
+	int hr = highTree(root->right);
+	return 1 + (hl > hr ? hl : hr);
+}
+
+int main() {
+	BSTree tree;
+	initBSTree(tree);
+
+	int a[] = { 45, 20, 15, 30, 60, 50, 75 };
+	int n = sizeof(a) / sizeof(a[0]);
+
+	createBSTree_fromarray(tree, a, n);
+
+	printf("Duyet LNR (Tang dan): ");
+	traverseLNR(tree.root);
+	printf("\n");
+
+	printf("Duyet chieu rong (BFS): ");
+	traverseBreadth(tree.root);
+	printf("\n");
+
+	printf("Tong so nut: %d\n", countBSTnode(tree.root));
+	printf("So nut la: %d\n", countLeaf(tree.root));
+	printf("So nut co 1 con: %d\n", countNodeHave1Child(tree.root));
+	printf("So nut co 2 con: %d\n", countNodeHave2Children(tree.root));
+	printf("Chieu cao cua cay: %d\n", highTree(tree.root));
+
+	return 0;
+}
